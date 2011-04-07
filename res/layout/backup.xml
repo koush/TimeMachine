@@ -20,7 +20,6 @@
         <Button android:layout_height="wrap_content"
             android:layout_width="fill_parent" android:text="@string/start_backup"
             android:layout_weight=".5" android:id="@+id/start_backup">
-            <requestFocus />
         </Button>
     </LinearLayout>
 </LinearLayout>

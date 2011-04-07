@@ -17,7 +17,10 @@ public final class R {
         public static final int ic_tab_applications=0x7f020003;
         public static final int ic_tab_applications_selected=0x7f020004;
         public static final int ic_tab_applications_unselected=0x7f020005;
-        public static final int icon=0x7f020006;
+        public static final int ic_tab_clock=0x7f020006;
+        public static final int ic_tab_clock_selected=0x7f020007;
+        public static final int ic_tab_clock_unselected=0x7f020008;
+        public static final int icon=0x7f020009;
     }
     public static final class id {
         public static final int application_group_name=0x7f050006;

@@ -77,6 +77,5 @@ public class BackupActivity extends Activity {
         lv.setAdapter(mAdapter);
         
         Button startBackup = (Button)findViewById(R.id.start_backup);
-        startBackup.requestFocus();
     }
 }

@@ -18,9 +18,9 @@ public class TimeMachineActivity extends TabActivity {
         Intent intent = new Intent(this, ApplicationsActivity.class);
         TabSpec backup = tabHost.newTabSpec("backup").setIndicator(getString(R.string.applications), getResources().getDrawable(R.drawable.ic_tab_applications)).setContent(intent);
         tabHost.addTab(backup);
-
+        
         intent = new Intent(this, RestoreActivity.class);
-        TabSpec restore = tabHost.newTabSpec("restore").setIndicator(getString(R.string.restore)).setContent(intent);
+        TabSpec restore = tabHost.newTabSpec("restore").setIndicator(getString(R.string.restore), getResources().getDrawable(R.drawable.ic_tab_clock)).setContent(intent);
         tabHost.addTab(restore);
     }
 }
