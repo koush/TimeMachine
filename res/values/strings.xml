@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Time Machine</string>
+    
+    <string name="applications">Applications</string>
+    <string name="all_applications">All Applications</string>
+    <string name="restore">Restore</string>
+    <string name="clear">Clear</string>
+    
+    <string name="start_backup">Start Backup</string>
+    <string name="sms_and_mms">SMS and MMS</string>
+    <string name="games">Games</string>
+    <string name="social_networking">Social Networking</string>
+    <string name="application_groups">Application Groups</string>
+    
+    <string name="backup">Backup</string>
+    <string name="select_an_application_to_backup">You must select at least one application to backup.</string>
+    
+    <string name="confirm_backup">Confirm Backup</string>
+    <string name="application_group_name_hint">Application Group Name (Optional)</string>
+</resources>
