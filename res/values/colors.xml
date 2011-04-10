@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="checked_application_background">#7F8399F2</color>
+    <color name="backup_old">#D0FC6060</color>
+    <color name="backup_new">#D012B515</color>
+</resources>

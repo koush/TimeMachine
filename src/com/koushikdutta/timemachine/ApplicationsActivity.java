@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,7 +23,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
@@ -81,8 +82,12 @@ public class ApplicationsActivity extends Activity {
         protected void afterCheckedChanged() {
         }
     }
+
+    static void bindCheckedState(View view, boolean checked) {
+        view.setBackgroundColor(checked ? view.getResources().getColor(R.color.checked_application_background) : 0);
+    }
     
-    static class BackupEntryAdapter<T extends BackupItem> extends ArrayAdapter<T>
+    class BackupEntryAdapter<T extends BackupItem> extends ArrayAdapter<T>
     {
         LayoutInflater mInflater;
         public BackupEntryAdapter(Context context) {
@@ -96,15 +101,18 @@ public class ApplicationsActivity extends Activity {
                 convertView = mInflater.inflate(R.layout.appinfo, null);
             
             final BackupItem info = getItem(position);
-            CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checked);
-            checkBox.setOnCheckedChangeListener(null);
-            checkBox.setChecked(info.backup | info.disabled);
-            checkBox.setOnCheckedChangeListener(info);
-            checkBox.setEnabled(!info.disabled);
             ImageView image = (ImageView)convertView.findViewById(R.id.icon);
             TextView name = (TextView)convertView.findViewById(R.id.name);
             name.setText(info.name);
             image.setImageDrawable(info.drawable);
+            
+            Random r = new Random();
+            float pct = r.nextFloat();
+            int c = scale(pct);
+            View v = convertView.findViewById(R.id.age);
+            v.setBackgroundColor(c);
+
+            bindCheckedState(convertView, info.backup | info.disabled);
             
             return convertView;
         }
@@ -115,7 +123,7 @@ public class ApplicationsActivity extends Activity {
     BackupEntryAdapter<SingleApplicationInfo> mAllAdapter;
     
     HashMap<String, SingleApplicationInfo> mAllPackages = new HashMap<String, SingleApplicationInfo>();
-    
+
     void addBatch(int resourceName, int drawable, String[] packages) {
         ApplicationBatch batch = new ApplicationBatch();
         batch.name = getString(resourceName);
@@ -129,9 +137,29 @@ public class ApplicationsActivity extends Activity {
             mGroupsAdapter.add(batch);
     }
 
+    int[] mOld;
+    int[] mNew;
+    
+    static int[] from(int color) {
+        return new int[] { Color.alpha(color), Color.red(color), Color.green(color), Color.blue(color) };
+    }
+    
+    int scale(float f) {
+        int[] ret = new int[4];
+        
+        for (int i = 0; i < 4; i++) {
+            ret[i] = mOld[i] + (int)((mNew[i] - mOld[i]) * f);
+        }
+        
+        return Color.argb(ret[0], ret[1], ret[2], ret[3]);
+    }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        mOld = from(getResources().getColor(R.color.backup_old));
+        mNew = from(getResources().getColor(R.color.backup_new));
 
         setContentView(R.layout.applications);
         
@@ -144,9 +172,12 @@ public class ApplicationsActivity extends Activity {
         lv.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                CheckBox checkBox = (CheckBox)arg1.findViewById(R.id.checked);
-                checkBox.setChecked(!checkBox.isChecked());
+            public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
+                BackupItem bi = (BackupItem)mAdapter.getItem(position);
+                if (bi.disabled)
+                    return;
+                bi.backup = !bi.backup;
+                bindCheckedState(view, bi.backup | bi.disabled);
             }
         });
         lv.setOnItemLongClickListener(new OnItemLongClickListener() {
