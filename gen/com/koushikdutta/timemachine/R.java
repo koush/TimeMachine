@@ -29,24 +29,31 @@ public final class R {
     }
     public static final class id {
         public static final int age=0x7f060000;
-        public static final int application_group_name=0x7f060006;
-        public static final int backup=0x7f060005;
-        public static final int checked=0x7f060008;
-        public static final int clear=0x7f060004;
+        public static final int application_group_name=0x7f060007;
+        public static final int application_icon=0x7f060009;
+        public static final int application_name=0x7f06000a;
+        public static final int application_status=0x7f06000b;
+        public static final int backup=0x7f060006;
+        public static final int backup_count=0x7f060004;
+        public static final int checked=0x7f06000e;
+        public static final int clear=0x7f060005;
+        public static final int done=0x7f06000d;
         public static final int icon=0x7f060001;
         public static final int list=0x7f060003;
-        public static final int list_header_title=0x7f060009;
+        public static final int list_header_title=0x7f06000f;
         public static final int name=0x7f060002;
-        public static final int start_backup=0x7f060007;
+        public static final int progress=0x7f06000c;
+        public static final int start_backup=0x7f060008;
     }
     public static final class layout {
         public static final int appinfo=0x7f030000;
         public static final int applications=0x7f030001;
         public static final int backup=0x7f030002;
-        public static final int confirm_appinfo=0x7f030003;
-        public static final int list_header=0x7f030004;
-        public static final int restore=0x7f030005;
-        public static final int timemachine=0x7f030006;
+        public static final int backup_progress=0x7f030003;
+        public static final int confirm_appinfo=0x7f030004;
+        public static final int list_header=0x7f030005;
+        public static final int restore=0x7f030006;
+        public static final int timemachine=0x7f030007;
     }
     public static final class string {
         public static final int all_applications=0x7f050002;
@@ -54,10 +61,14 @@ public final class R {
         public static final int application_group_name_hint=0x7f05000d;
         public static final int application_groups=0x7f050009;
         public static final int applications=0x7f050001;
+        public static final int applications_backed_up=0x7f050011;
         public static final int backup=0x7f05000a;
+        public static final int backup_complete=0x7f050010;
+        public static final int backup_count=0x7f05000e;
         public static final int clear=0x7f050004;
         public static final int confirm_backup=0x7f05000c;
         public static final int games=0x7f050007;
+        public static final int performing_backup=0x7f05000f;
         public static final int restore=0x7f050003;
         public static final int select_an_application_to_backup=0x7f05000b;
         public static final int sms_and_mms=0x7f050006;

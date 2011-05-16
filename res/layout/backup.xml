@@ -10,7 +10,8 @@
             android:layout_height="wrap_content" android:layout_width="fill_parent"
             android:hint="@string/application_group_name_hint"
             android:nextFocusUp="@+id/application_group_name"
-            android:nextFocusLeft="@+id/application_group_name" />
+            android:nextFocusLeft="@+id/application_group_name"
+            android:singleLine="true" />
     </LinearLayout>
     <ListView android:id="@+id/list" android:layout_width="fill_parent"
         android:layout_height="fill_parent" android:fastScrollEnabled="true"

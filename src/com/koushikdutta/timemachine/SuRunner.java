@@ -1,26 +1,24 @@
 package com.koushikdutta.timemachine;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
 import android.content.Context;
+import android.os.Environment;
 import android.os.Handler;
 
 public class SuRunner {
     HashMap<String, String> mEnvironment = new HashMap<String, String>();
+    StringBuilder mCommands = new StringBuilder();
     
     public void setEnvironment(String name, String value)
     {
         mEnvironment.put(name, value);
     }
-    
-    public interface SuCommandCallback
-    {
-        public void onCompleted(int result);
-    }
 
-    public void runSuCommandAsync(final Context context, final String command, final SuCommandCallback callback) {
+    public void runSuCommandAsync(final Context context, final SuCommandCallback callback) {
         Handler handler = null;
         try {
             if (callback != null)
@@ -37,7 +35,29 @@ public class SuRunner {
             @Override
             public void run() {
                 try {
-                    Process p = runSuCommandAsync(context, command);
+                    Process p = runSuCommandAsync(context);
+                    if (p == null) {
+                        return;
+                    }
+                    DataInputStream dis = new DataInputStream(p.getInputStream());
+                    String line;
+                    while (null != (line = dis.readLine())) {
+                        if (callback != null) {
+                            if (finalHandler != null) {
+                                final String fline = line;
+                                finalHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        callback.onOutputLine(fline);
+                                    }
+                                });
+                            }
+                            else {
+                                callback.onOutputLine(line);
+                            }
+                        }
+                    }
+                    dis.close();
                     result = p.waitFor();
                 }
                 catch (Exception e) {
@@ -51,12 +71,12 @@ public class SuRunner {
                         finalHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                callback.onCompleted(result);
+                                callback.onResult(result);
                             }
                         });
                     }
                     else {
-                        callback.onCompleted(result);
+                        callback.onResult(result);
                     }
                 }
             }  
@@ -64,27 +84,47 @@ public class SuRunner {
         thread.start();
     }
     
-    public Process runSuCommandAsync(Context context, String command) throws IOException
+    public final static String SCRIPT_NAME = "surunner.sh";
+    public Process runSuCommandAsync(Context context)
     {
-        String scriptName = String.valueOf(System.currentTimeMillis());
-        DataOutputStream fout = new DataOutputStream(context.openFileOutput(scriptName, 0));
-        
-        mEnvironment.put("BUSYBOX", context.getFilesDir().getAbsolutePath()+ "/busybox");
-        for (String key: mEnvironment.keySet()) {
-            String value = mEnvironment.get(key);
-            if (value == null)
-                continue;
-            fout.writeBytes(String.format("export %s='%s'\n", key, value));
+        try {
+            //String scriptName = String.valueOf(System.currentTimeMillis());
+            String scriptName = SCRIPT_NAME;
+            DataOutputStream fout = new DataOutputStream(context.openFileOutput(scriptName, 0));
+            
+            mEnvironment.put("BUSYBOX", context.getFilesDir().getAbsolutePath() + "/busybox");
+            mEnvironment.put("FILESDIR", context.getFilesDir().getAbsolutePath());
+            mEnvironment.put("TIMEMACHINEDIR", Environment.getExternalStorageDirectory().getAbsolutePath() + "/clockworkmod/timemachine/");
+            for (String key: mEnvironment.keySet()) {
+                String value = mEnvironment.get(key);
+                if (value == null)
+                    continue;
+                fout.writeBytes(String.format("export %s='%s'\n", key, value));
+            }
+            fout.writeBytes(mCommands.toString());
+            fout.close();
+            
+            String[] args = new String[] { "su", "-c", ". " + context.getFilesDir().getAbsolutePath() + "/" + scriptName };
+            return Runtime.getRuntime().exec(args);
         }
-        fout.writeBytes(command);
-        fout.close();
-        
-        String[] args = new String[] { "su", "-c", ". " + context.getFilesDir().getAbsolutePath() + "/" + scriptName };
-        return Runtime.getRuntime().exec(args);
+        catch (Exception ex) {
+            return null;
+        }
     }
 
-    public int runSuCommand(Context context, String command) throws IOException, InterruptedException
+    public int runSuCommand(Context context)
     {
-        return runSuCommandAsync(context, command).waitFor();
+        try {
+            return runSuCommandAsync(context).waitFor();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+    
+    public void addCommand(String command) {
+        mCommands.append(command);
+        mCommands.append('\n');
     }
 }

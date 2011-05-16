@@ -18,4 +18,10 @@
     
     <string name="confirm_backup">Confirm Backup</string>
     <string name="application_group_name_hint">Application Group Name (Optional)</string>
+    
+    <string name="backup_count">%d applications selected</string>
+    
+    <string name="performing_backup">Performing Backup</string>
+    <string name="backup_complete">Backup Complete</string>
+    <string name="applications_backed_up">%d applications backed up.</string>
 </resources>

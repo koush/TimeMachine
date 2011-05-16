@@ -3,6 +3,7 @@ package com.koushikdutta.timemachine;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -31,19 +32,27 @@ import android.widget.TextView;
 
 public class ApplicationsActivity extends Activity {
     LayoutInflater mInflater;
-    ArrayList<SingleApplicationInfo> mAppInfo = new ArrayList<ApplicationsActivity.SingleApplicationInfo>();
+    TextView mCountView;
     
-    abstract class BackupItem implements OnCheckedChangeListener {
+    void refreshCount() {
+        int count = 0;
+        for (SingleApplicationInfo sinfo: mAllPackages.values()) {
+            if (sinfo.disabled || sinfo.backup) 
+                count++;
+        }
+        mCountView.setText(getString(R.string.backup_count, count));
+    }
+    
+    abstract class BackupItem {
         ArrayList<ApplicationInfo> infos = new ArrayList<ApplicationInfo>();
         public boolean disabled = false;
         public boolean backup = false;
         public Drawable drawable;
         public String name;
         
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            backup = isChecked;
+        public void onCheckedChanged() {
             afterCheckedChanged();
+            refreshCount();
         }
         
         protected void afterCheckedChanged() {
@@ -162,6 +171,8 @@ public class ApplicationsActivity extends Activity {
         mNew = from(getResources().getColor(R.color.backup_new));
 
         setContentView(R.layout.applications);
+
+        mCountView = (TextView)findViewById(R.id.backup_count); 
         
         PackageManager pm = getPackageManager();
         mInflater = getLayoutInflater();
@@ -178,6 +189,7 @@ public class ApplicationsActivity extends Activity {
                     return;
                 bi.backup = !bi.backup;
                 bindCheckedState(view, bi.backup | bi.disabled);
+                bi.onCheckedChanged();
             }
         });
         lv.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -218,20 +230,29 @@ public class ApplicationsActivity extends Activity {
         backup.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<String> packages = new ArrayList<String>();
+                HashSet<String> packagesHash = new HashSet<String>();
                 for (int i = 0; i < mAllAdapter.getCount(); i++) {
                     SingleApplicationInfo sinfo = mAllAdapter.getItem(i);
                     if (sinfo.disabled || sinfo.backup)
-                        packages.add(sinfo.info.packageName);
+                        packagesHash.add(sinfo.info.packageName);
                 }
                 
-                if (packages.size() == 0) {
+                for (int i = 0; i < mGroupsAdapter.getCount(); i++) {
+                    ApplicationBatch binfo = mGroupsAdapter.getItem(i);
+                    if (!binfo.backup)
+                        continue;
+                    for (ApplicationInfo info: binfo.infos) {
+                        packagesHash.add(info.packageName);
+                    }
+                }
+                
+                if (packagesHash.size() == 0) {
                     Helper.showAlertDialogWithTitle(ApplicationsActivity.this, R.string.backup, R.string.select_an_application_to_backup);
                     return;
                 }
                 
                 Intent i = new Intent(ApplicationsActivity.this, BackupActivity.class);
-                i.putStringArrayListExtra("packages", packages);
+                i.putStringArrayListExtra("packages", new ArrayList<String>(packagesHash));
                 startActivity(i);
             }
         });
