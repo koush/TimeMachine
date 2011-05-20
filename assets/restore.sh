@@ -1,3 +1,5 @@
+#!/data/data/com.koushikdutta.timemachine/files/bash
+
 if [ -z "$FILESDIR" ]
 then
   echo FILESDIR environment variable not set.

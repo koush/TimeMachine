@@ -1,18 +1,22 @@
 package com.koushikdutta.timemachine;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
+
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,10 +33,12 @@ public class BackupActivity extends Activity {
     class SingleApplicationInfo
     {
         ApplicationInfo info;
+        PackageInfo pinfo;
         public Drawable drawable;
         public String name;
-        public SingleApplicationInfo(ApplicationInfo info, PackageManager pm) {
-            this.info = info;
+        public SingleApplicationInfo(PackageInfo pinfo, PackageManager pm) {
+            this.pinfo = pinfo;
+            info = pinfo.applicationInfo;
             name = info.loadLabel(pm).toString();
             drawable = info.loadIcon(pm);
         }
@@ -73,8 +79,8 @@ public class BackupActivity extends Activity {
         mAdapter = new ApplicationInfoAdapter(this);
         for (String p: packages) {
             try {
-                ApplicationInfo ai = pm.getApplicationInfo(p, 0);
-                mAdapter.add(new SingleApplicationInfo(ai, pm));
+                PackageInfo pi = pm.getPackageInfo(p, 0);
+                mAdapter.add(new SingleApplicationInfo(pi, pm));
             }
             catch (Exception e) {
             }
@@ -135,26 +141,46 @@ public class BackupActivity extends Activity {
                         
                         SuRunner suRunner = new SuRunner();
                         try {
-                            SingleApplicationInfo sinfo = mAdapter.getItem(current);
+                            final SingleApplicationInfo sinfo = mAdapter.getItem(current);
                             appName.setText(sinfo.name);
                             appIcon.setImageDrawable(sinfo.drawable);
-                            Context pkgContext = createPackageContext(sinfo.info.packageName, 0);
-                            String apk = pkgContext.getPackageCodePath();
-                            suRunner.mEnvironment.put("OUTPUT_DIR", String.format("%s/clockworkmod/timemachine/%s/%d", Environment.getExternalStorageDirectory().getAbsolutePath(), sinfo.info.packageName, time));
+                            final JSONObject metadata = new JSONObject();
+                            final String outputDir = String.format("%s/%s/%d", Helper.BACKUP_DIR, sinfo.info.packageName, time);
+                            metadata.put("installer", pm.getInstallerPackageName(sinfo.info.packageName));
+                            metadata.put("name", sinfo.name);
+                            metadata.put("versionCode", sinfo.pinfo.versionCode);
+                            metadata.put("versionName", sinfo.pinfo.versionName);
+                            metadata.put("packageName", sinfo.info.packageName);
+                            suRunner.mEnvironment.put("OUTPUT_DIR", outputDir);
                             suRunner.mEnvironment.put("PACKAGE_NAME", sinfo.info.packageName);
-                            suRunner.mEnvironment.put("PACKAGE_APK", apk);
                             suRunner.addCommand(String.format("%s/backup.sh", getFilesDir().getAbsolutePath()));
                             suRunner.runSuCommandAsync(BackupActivity.this, new SuCommandCallback() {
                                 @Override
                                 public void onResult(Integer result) {
+                                    // need to be on the foreground thread so the surunner has a handler
                                     System.out.println(result);
                                     current++;
                                     run();
                                 }
                                 
+                                void onResultBackround(int result) {
+                                    // do this stuff on the background to prevent ui thread blocking
+                                    try {
+                                        if (result == 0) {
+                                            StreamUtility.writeStringToFile(outputDir + "/metadata.json", metadata.toString(4));
+                                            BitmapDrawable bmp = (BitmapDrawable)sinfo.drawable;
+                                            FileOutputStream fout = new FileOutputStream(outputDir + "/icon.png");
+                                            bmp.getBitmap().compress(CompressFormat.PNG, 100, fout);
+                                            fout.close();
+                                        }
+                                    }
+                                    catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+                                
                                 @Override
                                 public void onOutputLine(String line) {
-                                    System.out.println(line);
                                     appStatus.setText(line);
                                 }
                             });

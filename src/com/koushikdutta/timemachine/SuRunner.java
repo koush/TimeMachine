@@ -94,7 +94,7 @@ public class SuRunner {
             
             mEnvironment.put("BUSYBOX", context.getFilesDir().getAbsolutePath() + "/busybox");
             mEnvironment.put("FILESDIR", context.getFilesDir().getAbsolutePath());
-            mEnvironment.put("TIMEMACHINEDIR", Environment.getExternalStorageDirectory().getAbsolutePath() + "/clockworkmod/timemachine/");
+            mEnvironment.put("TIMEMACHINEDIR", Helper.BASE_DIR);
             for (String key: mEnvironment.keySet()) {
                 String value = mEnvironment.get(key);
                 if (value == null)
