@@ -1,6 +1,7 @@
 package com.koushikdutta.timemachine;
 
 public abstract class SuCommandCallback implements Callback<Integer> {
+    void onStartBackground() {};
     void onOutputLine(String line) {};
-    void onResultBackround(int result) {};
+    void onResultBackground(int result) {};
 }

@@ -30,7 +30,7 @@ import android.widget.TextView;
 
 public class BackupActivity extends Activity {
     
-    class SingleApplicationInfo
+    private static class SingleApplicationInfo
     {
         ApplicationInfo info;
         PackageInfo pinfo;
@@ -163,16 +163,14 @@ public class BackupActivity extends Activity {
                                     run();
                                 }
                                 
-                                void onResultBackround(int result) {
+                                void onStartBackground() {
                                     // do this stuff on the background to prevent ui thread blocking
                                     try {
-                                        if (result == 0) {
-                                            StreamUtility.writeStringToFile(outputDir + "/metadata.json", metadata.toString(4));
-                                            BitmapDrawable bmp = (BitmapDrawable)sinfo.drawable;
-                                            FileOutputStream fout = new FileOutputStream(outputDir + "/icon.png");
-                                            bmp.getBitmap().compress(CompressFormat.PNG, 100, fout);
-                                            fout.close();
-                                        }
+                                        StreamUtility.writeFile(outputDir + "/metadata.json", metadata.toString(4));
+                                        BitmapDrawable bmp = (BitmapDrawable)sinfo.drawable;
+                                        FileOutputStream fout = new FileOutputStream(outputDir + "/icon.png");
+                                        bmp.getBitmap().compress(CompressFormat.PNG, 100, fout);
+                                        fout.close();
                                     }
                                     catch (Exception ex) {
                                         ex.printStackTrace();

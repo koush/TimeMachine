@@ -4,11 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -44,13 +46,26 @@ public class StreamUtility {
 		
 		return new String(buff.toByteArray());
 	}
-	
-    public static void writeStringToFile(File file, String string) throws IOException {
-        writeStringToFile(file.getAbsolutePath(), string);
+
+    static public String readFile(String filename) throws IOException {
+        return readFile(new File(filename));
     }
     
-    public static void writeStringToFile(String file, String string) throws IOException {
-        DataOutputStream dout = new DataOutputStream(new FileOutputStream(file));
+    static public String readFile(File file) throws IOException {
+        byte[] buffer = new byte[(int) file.length()];
+        DataInputStream input = new DataInputStream(new FileInputStream(file));
+        input.readFully(buffer);
+        return new String(buffer);
+    }
+	
+    public static void writeFile(File file, String string) throws IOException {
+        writeFile(file.getAbsolutePath(), string);
+    }
+    
+    public static void writeFile(String file, String string) throws IOException {
+        File f = new File(file);
+        f.getParentFile().mkdirs();
+        DataOutputStream dout = new DataOutputStream(new FileOutputStream(f));
         dout.write(string.getBytes());
         dout.close();
     }

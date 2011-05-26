@@ -9,7 +9,7 @@
         <TextView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/application_status" android:textSize="16sp" android:layout_gravity="center" android:gravity="center" android:padding="2sp" android:singleLine="true" android:ellipsize="end" />
     </LinearLayout>
     <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1">
-        <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/progress" android:indeterminate="false" android:layout_gravity="center" />
+        <ProgressBar android:layout_width="290dp" android:layout_height="wrap_content" android:id="@+id/progress" android:indeterminate="false" android:layout_gravity="center" style="?android:attr/progressBarStyleHorizontal" android:padding="6dp" />
         <Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/done" android:text="@android:string/cancel" android:layout_gravity="center" android:layout_centerInParent="true" />
     </LinearLayout>
 </LinearLayout>

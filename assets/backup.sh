@@ -58,21 +58,24 @@ function saveblob {
     $BUSYBOX cp $1 $TIMEMACHINE_ASSETS/$blobmd5
   fi
   echo $blobmd5 > $2
+  if [ ! -z "$3" ]
+  then
+    $BUSYBOX rm -f $1
+  fi
 }
 
 $BUSYBOX mkdir -p $OUTPUT_DIR
 cd /data/data/$PACKAGE_NAME
 $BUSYBOX tar czvf $OUTPUT_DIR/internal.tgz .
-saveblob $OUTPUT_DIR/internal.tgz $OUTPUT_DIR/internal.md5sum
-rm -f $OUTPUT_DIR/internal.tgz
+saveblob $OUTPUT_DIR/internal.tgz $OUTPUT_DIR/internal.md5sum 1
+$BUSYBOX cp $OUTPUT_DIR/icon.png $OUTPUT_DIR/..
+$BUSYBOX cp $OUTPUT_DIR/metadata.json $OUTPUT_DIR/..
 
 if [ -d /sdcard/Android/data/$PACKAGE_NAME ]
 then
   cd /sdcard/Android/data/$PACKAGE_NAME
   $BUSYBOX tar czvf $OUTPUT_DIR/external.tgz .
-  saveblob $OUTPUT_DIR/external.tgz $OUTPUT_DIR/external.md5sum
-  rm -f $OUTPUT_DIR/external.tgz
+  saveblob $OUTPUT_DIR/external.tgz $OUTPUT_DIR/external.md5sum 1
 fi
 
-# save space by checking to see if an md5 blob matches
 saveblob $PACKAGE_APK $OUTPUT_DIR/apk.md5sum

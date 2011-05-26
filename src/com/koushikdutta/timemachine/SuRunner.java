@@ -35,6 +35,7 @@ public class SuRunner {
             @Override
             public void run() {
                 try {
+                    callback.onStartBackground();
                     Process p = runSuCommandAsync(context);
                     if (p == null) {
                         return;
@@ -67,6 +68,7 @@ public class SuRunner {
                 {
                     if (callback == null)
                         return;
+                    callback.onResultBackground(result);
                     if (finalHandler != null) {
                         finalHandler.post(new Runnable() {
                             @Override
