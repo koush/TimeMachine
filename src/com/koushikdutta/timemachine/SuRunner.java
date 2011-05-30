@@ -95,8 +95,9 @@ public class SuRunner {
             DataOutputStream fout = new DataOutputStream(context.openFileOutput(scriptName, 0));
             
             mEnvironment.put("BUSYBOX", context.getFilesDir().getAbsolutePath() + "/busybox");
-            mEnvironment.put("FILESDIR", context.getFilesDir().getAbsolutePath());
-            mEnvironment.put("TIMEMACHINEDIR", Helper.BASE_DIR);
+            mEnvironment.put("FILES_DIR", context.getFilesDir().getAbsolutePath());
+            mEnvironment.put("TIMEMACHINE_DIR", Helper.BASE_DIR);
+            mEnvironment.put("ASSETS_DIR", Helper.ASSETS_DIR);
             for (String key: mEnvironment.keySet()) {
                 String value = mEnvironment.get(key);
                 if (value == null)

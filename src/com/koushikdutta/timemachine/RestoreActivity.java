@@ -23,6 +23,11 @@ import android.widget.TextView;
 
 public class RestoreActivity extends Activity {
     
+    // groups will be maintained in a database.
+    // a group is user defined, but starts with defaults.
+    // a valid restore group is when all the applications in the group have the same
+    // backup timestamp.
+    
     private static class SingleApplicationInfo
     {
         public JSONObject info;
