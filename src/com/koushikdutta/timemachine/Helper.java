@@ -1,5 +1,8 @@
 package com.koushikdutta.timemachine;
 
+import java.io.File;
+import java.io.FileFilter;
+
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -26,6 +29,15 @@ public class Helper {
         builder.setMessage(stringResource);
         builder.setPositiveButton(android.R.string.ok, null);
         builder.create().show();
+    }
+    
+    static public File[] getDirectories(File file) {
+        return file.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.isDirectory();
+            }
+        });
     }
     
     public static final String BASE_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() + "/clockworkmod/timemachine";
