@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,6 +15,9 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -24,8 +26,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -33,6 +33,68 @@ import android.widget.TextView;
 public class ApplicationsActivity extends Activity {
     LayoutInflater mInflater;
     TextView mCountView;
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuItem date = menu.add(R.string.sort_by_date);
+        date.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                mAllAdapter.sort(new Comparator<SingleApplicationInfo>() {
+                    @Override
+                    public int compare(SingleApplicationInfo object1, SingleApplicationInfo object2) {
+                        long d1 = object1.getBackupDate(ApplicationsActivity.this);
+                        long d2 = object2.getBackupDate(ApplicationsActivity.this);
+                        if (d1 > d2)
+                            return 1;
+                        if (d1 < d2)
+                            return -1;
+                        String n1 = object1.name;
+                        String n2 = object2.name;
+                        return n1.compareToIgnoreCase(n2);
+                    }
+                });
+                mAdapter.notifyDataSetChanged();
+                return true;
+            }
+        });
+
+        MenuItem pkg = menu.add(R.string.sort_by_package);
+        pkg.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                mAllAdapter.sort(new Comparator<SingleApplicationInfo>() {
+                    @Override
+                    public int compare(SingleApplicationInfo object1, SingleApplicationInfo object2) {
+                        String n1 = object1.info.packageName;
+                        String n2 = object2.info.packageName;
+                        return n1.compareToIgnoreCase(n2);
+                    }
+                });
+                mAdapter.notifyDataSetChanged();
+                return true;
+            }
+        });
+
+        MenuItem name = menu.add(R.string.sort_by_name);
+        name.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                mAllAdapter.sort(new Comparator<SingleApplicationInfo>() {
+                    @Override
+                    public int compare(SingleApplicationInfo object1, SingleApplicationInfo object2) {
+                        String n1 = object1.name;
+                        String n2 = object2.name;
+                        return n1.compareToIgnoreCase(n2);
+                    }
+                });
+                mAdapter.notifyDataSetChanged();
+                return true;
+            }
+        });
+        
+        return super.onCreateOptionsMenu(menu);
+    }
     
     void refreshCount() {
         int count = 0;
@@ -43,7 +105,7 @@ public class ApplicationsActivity extends Activity {
         mCountView.setText(getString(R.string.backup_count, count));
     }
     
-    abstract class BackupItem {
+    private abstract class BackupItem {
         ArrayList<ApplicationInfo> infos = new ArrayList<ApplicationInfo>();
         public boolean disabled = false;
         public boolean backup = false;
@@ -72,12 +134,20 @@ public class ApplicationsActivity extends Activity {
             
             mAdapter.notifyDataSetChanged();
         }
+        
+        public long getBackupDate(Context context) {
+            return 0;
+        }
+        
+        public int getColor(Context context) {
+            return 0;
+        }
     }
     
-    class ApplicationBatch extends BackupItem {
+    private class ApplicationBatch extends BackupItem {
     }
     
-    class SingleApplicationInfo extends BackupItem
+    private class SingleApplicationInfo extends BackupItem
     {
         ApplicationInfo info;
         public SingleApplicationInfo(ApplicationInfo info, PackageManager pm) {
@@ -89,6 +159,20 @@ public class ApplicationsActivity extends Activity {
 
         @Override
         protected void afterCheckedChanged() {
+        }
+        
+        @Override
+        public long getBackupDate(Context context) {
+            BackupManager mgr = BackupManager.getInstance(context);
+            BackupEntry entry = mgr.backups.get(info.packageName);
+            if (entry == null)
+                return Long.MAX_VALUE;
+            return entry.newest;
+        }
+        
+        @Override
+        public int getColor(Context context) {
+            return BackupManager.getColor(context, info.packageName);
         }
     }
 
@@ -115,11 +199,8 @@ public class ApplicationsActivity extends Activity {
             name.setText(info.name);
             image.setImageDrawable(info.drawable);
             
-            Random r = new Random();
-            float pct = r.nextFloat();
-            int c = scale(pct);
             View v = convertView.findViewById(R.id.age);
-            v.setBackgroundColor(c);
+            v.setBackgroundColor(info.getColor(ApplicationsActivity.this));
 
             bindCheckedState(convertView, info.backup | info.disabled);
             

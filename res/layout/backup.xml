@@ -4,14 +4,16 @@
     android:orientation="vertical">
     <!-- Focusable to prevent the edit text from spamming a keyboard. -->
     <LinearLayout android:layout_height="wrap_content"
-        android:layout_width="fill_parent" android:orientation="vertical"
+        android:layout_width="fill_parent" android:orientation="horizontal"
         android:focusable="true" android:focusableInTouchMode="true" android:padding="6sp">
+        <ImageView android:id="@+id/application_group_icon" android:layout_width="48sp" android:padding="4sp"
+            android:layout_height="48sp" android:layout_gravity="center" android:scaleType="fitXY" />
         <EditText android:id="@+id/application_group_name"
             android:layout_height="wrap_content" android:layout_width="fill_parent"
             android:hint="@string/application_group_name_hint"
             android:nextFocusUp="@+id/application_group_name"
             android:nextFocusLeft="@+id/application_group_name"
-            android:singleLine="true" />
+            android:singleLine="true" android:layout_weight="1" />
     </LinearLayout>
     <ListView android:id="@+id/list" android:layout_width="fill_parent"
         android:layout_height="fill_parent" android:fastScrollEnabled="true"

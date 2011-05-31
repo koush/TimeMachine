@@ -2,6 +2,8 @@ package com.koushikdutta.timemachine;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.math.BigInteger;
+import java.security.MessageDigest;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -38,6 +40,16 @@ public class Helper {
                 return pathname.isDirectory();
             }
         });
+    }
+    
+    static public String digest(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            return new BigInteger(1, md.digest(input.getBytes())).toString(16).toUpperCase();
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
     
     public static final String BASE_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() + "/clockworkmod/timemachine";

@@ -19,9 +19,15 @@
     <string name="confirm_backup">Confirm Backup</string>
     <string name="application_group_name_hint">Application Group Name (Optional)</string>
     
-    <string name="backup_count">%d applications selected</string>
+    <string name="backup_count">%d applications selected for backup</string>
     
     <string name="performing_backup">Performing Backup</string>
     <string name="backup_complete">Backup Complete</string>
     <string name="applications_backed_up">%d applications backed up.</string>
+    
+    <string name="sort_by_package">Sort by Package</string>
+    <string name="sort_by_name">Sort by Name</string>
+    <string name="sort_by_date">Sort by Date</string>
+
+    <string name="restore_count">%d applications selected for restore</string>
 </resources>

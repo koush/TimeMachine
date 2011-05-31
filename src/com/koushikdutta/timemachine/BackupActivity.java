@@ -21,6 +21,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -86,8 +88,19 @@ public class BackupActivity extends Activity {
             }
         }
         
+        final ImageView groupIcon = (ImageView)findViewById(R.id.application_group_icon);
+        groupIcon.setImageDrawable(mAdapter.getItem(0).drawable);
+        
         ListView lv = (ListView)findViewById(R.id.list);
         lv.setAdapter(mAdapter);
+        
+        lv.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                SingleApplicationInfo info  = mAdapter.getItem(position);
+                groupIcon.setImageDrawable(info.drawable);
+            }
+        });
         
         Button startBackup = (Button)findViewById(R.id.start_backup);
         startBackup.setOnClickListener(new OnClickListener() {

@@ -1,14 +1,18 @@
 package com.koushikdutta.timemachine;
 
-import java.util.Random;
+import java.util.HashSet;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -20,7 +24,13 @@ public class RestoreActivity extends Activity {
     // a valid restore group is when all the applications in the group have the same
     // backup timestamp.
     
-    static class ApplicationInfoAdapter extends ArrayAdapter<BackupEntry>
+    HashSet<String> mRestore = new HashSet<String>();
+
+    static void bindCheckedState(View view, boolean checked) {
+        view.setBackgroundColor(checked ? view.getResources().getColor(R.color.checked_application_background) : 0);
+    }
+
+    class ApplicationInfoAdapter extends ArrayAdapter<BackupEntry>
     {
         LayoutInflater mInflater;
         public ApplicationInfoAdapter(Context context) {
@@ -42,6 +52,8 @@ public class RestoreActivity extends Activity {
             View v = convertView.findViewById(R.id.age);
             v.setBackgroundColor(info.getColor());
 
+            bindCheckedState(convertView, mRestore.contains(info.packageName));
+
             return convertView;
         }
     }
@@ -56,8 +68,38 @@ public class RestoreActivity extends Activity {
         mAdapter = new ApplicationInfoAdapter(this);
         ListView lv = (ListView)findViewById(R.id.list);
         lv.setAdapter(mAdapter);
+        final TextView restoreCount = (TextView)findViewById(R.id.restore_count);
+        lv.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
+                BackupEntry be = (BackupEntry)mAdapter.getItem(position);
+                boolean restore;
+                if (restore = !mRestore.remove(be.packageName)) {
+                    mRestore.add(be.packageName);
+                }
+                bindCheckedState(view, restore);
+                restoreCount.setText(getString(R.string.restore_count, mRestore.size()));
+            }
+        });
 
         refreshBackups();
+        
+        
+        Button clear = (Button)findViewById(R.id.clear);
+        clear.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRestore.clear();
+                mAdapter.notifyDataSetChanged();
+            }
+        });    
+
+        Button restore = (Button)findViewById(R.id.restore);
+        restore.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            }
+        });
     }
     
     @Override
