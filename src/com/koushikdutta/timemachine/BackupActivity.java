@@ -20,11 +20,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -89,8 +91,19 @@ public class BackupActivity extends Activity {
             }
         }
         
-        final TextView groupName = (TextView)findViewById(R.id.application_group_name);
-        groupName.setText(getIntent().getStringExtra("groupName"));
+        final EditText groupName = (EditText)findViewById(R.id.application_group_name);
+        groupName.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && Helper.isNullOrEmpty(groupName)) {
+                    String gn = getIntent().getStringExtra("groupName");
+                    if (!Helper.isNullOrEmpty(gn)) {
+                        groupName.setText(gn);
+                        groupName.setSelection(0, gn.length());
+                    }
+                }
+            }
+        });
         
         final ImageView groupIcon = (ImageView)findViewById(R.id.application_group_icon);
         groupIcon.setImageDrawable(mGroupDrawable = mAdapter.getItem(0).drawable);
@@ -112,7 +125,7 @@ public class BackupActivity extends Activity {
             @Override
             public void onClick(View v) {
                 CharSequence gn = groupName.getText();
-                if (gn != null && !"".equals(gn.toString())) {
+                if (!Helper.isNullOrEmpty(gn)) {
                     BackupManager bm = BackupManager.getInstance(BackupActivity.this);
                     BackupEntryGroup bg = bm.groups.get(gn.toString());
                     if (bg == null) {

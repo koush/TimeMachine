@@ -12,6 +12,7 @@ import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Environment;
+import android.widget.TextView;
 
 public class Helper {
     static public void showAlertDialog(Context context, int stringResource)
@@ -34,6 +35,14 @@ public class Helper {
         builder.setMessage(stringResource);
         builder.setPositiveButton(android.R.string.ok, positiveListener);
         builder.create().show();
+    }
+    
+    static public boolean isNullOrEmpty(CharSequence cs) {
+        return cs == null || cs.toString().equals("");
+    }
+    
+    static public boolean isNullOrEmpty(TextView tv) {
+        return isNullOrEmpty(tv.getText());
     }
     
     static public void showAlertDialogWithTitle(Context context, int titleResource, int stringResource)
