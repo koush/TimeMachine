@@ -30,4 +30,7 @@
     <string name="sort_by_date">Sort by Date</string>
 
     <string name="restore_count">%d applications selected for restore</string>
+    
+    <string name="remove_group">Remove Group</string>
+    <string name="remove_group_confirm">Remove group from the list?</string>
 </resources>

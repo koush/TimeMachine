@@ -5,16 +5,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.net.URLConnection;
 
-import android.util.Log;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class StreamUtility {
 	private static final String LOGTAG = "ROMManager";
@@ -49,6 +46,14 @@ public class StreamUtility {
 
     static public String readFile(String filename) throws IOException {
         return readFile(new File(filename));
+    }
+    
+    static public JSONObject readJSON(String filename) throws JSONException, IOException {
+        return new JSONObject(readFile(filename));
+    }
+
+    static public JSONObject readJSON(File file) throws JSONException, IOException {
+        return new JSONObject(readFile(file));
     }
     
     static public String readFile(File file) throws IOException {

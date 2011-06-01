@@ -8,6 +8,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -226,6 +227,19 @@ public class ApplicationsActivity extends Activity {
         if (batch.infos.size() > 0)
             mGroupsAdapter.add(batch);
     }
+    
+    void addBatch(BackupEntryGroup bg) {
+        ApplicationBatch batch = new ApplicationBatch();
+        batch.name = bg.name;
+        batch.drawable = bg.drawable;
+        for (String messagingPackage: bg.packages) {
+            SingleApplicationInfo sinfo = mAllPackages.get(messagingPackage);
+            if (sinfo != null)
+                batch.infos.add(mAllPackages.get(messagingPackage).info);
+        }
+        if (batch.infos.size() > 0)
+            mGroupsAdapter.add(batch);
+    }
 
     int[] mOld;
     int[] mNew;
@@ -244,6 +258,20 @@ public class ApplicationsActivity extends Activity {
         return Color.argb(ret[0], ret[1], ret[2], ret[3]);
     }
     
+    void refresh() {
+        mGroupsAdapter.clear();
+        for (BackupEntryGroup bg: BackupManager.getInstance(this).groups.values()) {
+            addBatch(bg);
+        }
+        mAdapter.notifyDataSetChanged();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refresh();
+    }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -257,8 +285,6 @@ public class ApplicationsActivity extends Activity {
         
         PackageManager pm = getPackageManager();
         mInflater = getLayoutInflater();
-        
-        List<ApplicationInfo> packages = pm.getInstalledApplications(0);
         
         ListView lv = (ListView)findViewById(R.id.list);
         lv.setOnItemClickListener(new OnItemClickListener() {
@@ -275,13 +301,27 @@ public class ApplicationsActivity extends Activity {
         });
         lv.setOnItemLongClickListener(new OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                BackupItem bi = (BackupItem)mAdapter.getItem(position);
+                if (!(bi instanceof ApplicationBatch))
+                    return false;
+                final ApplicationBatch batch = (ApplicationBatch)bi;
+                Helper.showAlertDialogWithTitle(ApplicationsActivity.this, R.string.remove_group, R.string.remove_group_confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        BackupManager bm = BackupManager.getInstance(ApplicationsActivity.this);
+                        bm.groups.remove(batch.name);
+                        bm.saveGroups();
+                        refresh();
+                    }
+                });
                 return true;
             }
         });
         
         mAllAdapter = new BackupEntryAdapter<SingleApplicationInfo>(this);
 
+        List<ApplicationInfo> packages = pm.getInstalledApplications(0);
         for (ApplicationInfo info: packages) {
             SingleApplicationInfo ci = new SingleApplicationInfo(info, pm);
             mAllAdapter.add(ci);
@@ -295,13 +335,12 @@ public class ApplicationsActivity extends Activity {
         });
         
         mGroupsAdapter = new BackupEntryAdapter<ApplicationBatch>(this);
-        addBatch(R.string.sms_and_mms, R.drawable.ic_launcher_smsmms, new String[] { "com.android.mms", "com.android.providers.telephony" });
-        addBatch(R.string.games, R.drawable.ic_launcher_games, new String[] { "com.android.mms", "com.android.providers.telephony" });
-        addBatch(R.string.social_networking, R.drawable.ic_launcher_twitter, new String[] { "com.twitter.android", "com.facebook.katana" });
-
+        
         mAdapter = new SeparatedListAdapter(this);
         mAdapter.addSection(getString(R.string.application_groups), mGroupsAdapter);
         mAdapter.addSection(getString(R.string.all_applications), mAllAdapter);
+
+        refresh();
 
         // TODO: add previous backups adapter
         
@@ -318,10 +357,14 @@ public class ApplicationsActivity extends Activity {
                         packagesHash.add(sinfo.info.packageName);
                 }
                 
+                int groupCount = 0;
+                String groupName = null;
                 for (int i = 0; i < mGroupsAdapter.getCount(); i++) {
                     ApplicationBatch binfo = mGroupsAdapter.getItem(i);
                     if (!binfo.backup)
                         continue;
+                    groupCount++;
+                    groupName = binfo.name;
                     for (ApplicationInfo info: binfo.infos) {
                         packagesHash.add(info.packageName);
                     }
@@ -333,6 +376,9 @@ public class ApplicationsActivity extends Activity {
                 }
                 
                 Intent i = new Intent(ApplicationsActivity.this, BackupActivity.class);
+                if (groupCount == 1) {
+                    i.putExtra("groupName", groupName);
+                }
                 i.putStringArrayListExtra("packages", new ArrayList<String>(packagesHash));
                 startActivity(i);
             }

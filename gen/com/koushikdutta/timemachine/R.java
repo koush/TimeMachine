@@ -72,6 +72,8 @@ public final class R {
         public static final int confirm_backup=0x7f05000c;
         public static final int games=0x7f050007;
         public static final int performing_backup=0x7f05000f;
+        public static final int remove_group=0x7f050016;
+        public static final int remove_group_confirm=0x7f050017;
         public static final int restore=0x7f050003;
         public static final int restore_count=0x7f050015;
         public static final int select_an_application_to_backup=0x7f05000b;

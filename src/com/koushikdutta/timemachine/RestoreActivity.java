@@ -109,7 +109,7 @@ public class RestoreActivity extends Activity {
     }
     
     void refreshBackups() {
-        BackupManager.getInstance(this).refreshBackups();
+        BackupManager.getInstance(this).refresh();
 
         mAdapter.clear();
         for (BackupEntry entry: BackupManager.getInstance(this).backups.values()) {

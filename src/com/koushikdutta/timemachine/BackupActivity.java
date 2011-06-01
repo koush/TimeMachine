@@ -69,6 +69,7 @@ public class BackupActivity extends Activity {
         }
     }
     
+    Drawable mGroupDrawable;
     ApplicationInfoAdapter mAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,8 +89,11 @@ public class BackupActivity extends Activity {
             }
         }
         
+        final TextView groupName = (TextView)findViewById(R.id.application_group_name);
+        groupName.setText(getIntent().getStringExtra("groupName"));
+        
         final ImageView groupIcon = (ImageView)findViewById(R.id.application_group_icon);
-        groupIcon.setImageDrawable(mAdapter.getItem(0).drawable);
+        groupIcon.setImageDrawable(mGroupDrawable = mAdapter.getItem(0).drawable);
         
         ListView lv = (ListView)findViewById(R.id.list);
         lv.setAdapter(mAdapter);
@@ -98,6 +102,7 @@ public class BackupActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
                 SingleApplicationInfo info  = mAdapter.getItem(position);
+                mGroupDrawable = info.drawable;
                 groupIcon.setImageDrawable(info.drawable);
             }
         });
@@ -106,6 +111,25 @@ public class BackupActivity extends Activity {
         startBackup.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                CharSequence gn = groupName.getText();
+                if (gn != null && !"".equals(gn.toString())) {
+                    BackupManager bm = BackupManager.getInstance(BackupActivity.this);
+                    BackupEntryGroup bg = bm.groups.get(gn.toString());
+                    if (bg == null) {
+                        bg = new BackupEntryGroup();
+                        bg.name = gn.toString();
+                        bg.drawable = mGroupDrawable;
+                        bm.groups.put(bg.name, bg);
+                    }
+                    for (int i = 0; i < mAdapter.getCount(); i++) {
+                        SingleApplicationInfo sinfo = mAdapter.getItem(i);
+                        bg.packages.add(sinfo.info.packageName);
+                    }
+                    Helper.unique(bg.packages);
+                    bm.saveGroups();
+                }
+                
+                
                 final long time = System.currentTimeMillis();
                 AlertDialog.Builder builder = new Builder(BackupActivity.this);
                 builder.setCancelable(false);
