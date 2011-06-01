@@ -6,10 +6,8 @@ import org.json.JSONObject;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
-public class BackupEntry {
+public class BackupEntry extends BackupEntryBase {
     public JSONObject info;
-    public Drawable drawable;
-    public String name;
     public String packageName;
     public long newest;
     
@@ -29,6 +27,7 @@ public class BackupEntry {
     
     private static long ONE_WEEK = 7L * 24L * 60L * 60L * 1000L;
     
+    @Override
     public int getColor() {
         int[] ret = new int[4];
         
@@ -43,5 +42,10 @@ public class BackupEntry {
         }
         
         return Color.argb(ret[0], ret[1], ret[2], ret[3]);
+    }
+    
+    @Override
+    public String getUniqueName() {
+        return packageName;
     }
 }

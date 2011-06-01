@@ -203,7 +203,7 @@ public class ApplicationsActivity extends Activity {
             View v = convertView.findViewById(R.id.age);
             v.setBackgroundColor(info.getColor(ApplicationsActivity.this));
 
-            bindCheckedState(convertView, info.backup | info.disabled);
+            bindCheckedState(convertView, info.backup || info.disabled);
             
             return convertView;
         }
@@ -288,7 +288,6 @@ public class ApplicationsActivity extends Activity {
         
         ListView lv = (ListView)findViewById(R.id.list);
         lv.setOnItemClickListener(new OnItemClickListener() {
-
             @Override
             public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
                 BackupItem bi = (BackupItem)mAdapter.getItem(position);
