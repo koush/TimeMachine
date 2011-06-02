@@ -56,7 +56,8 @@ public final class R {
         public static final int confirm_appinfo=0x7f030004;
         public static final int list_header=0x7f030005;
         public static final int restore=0x7f030006;
-        public static final int timemachine=0x7f030007;
+        public static final int restore_progress=0x7f030007;
+        public static final int timemachine=0x7f030008;
     }
     public static final class string {
         public static final int all_applications=0x7f050002;
@@ -72,6 +73,7 @@ public final class R {
         public static final int confirm_backup=0x7f05000c;
         public static final int games=0x7f050007;
         public static final int performing_backup=0x7f05000f;
+        public static final int performing_restore=0x7f050018;
         public static final int remove_group=0x7f050016;
         public static final int remove_group_confirm=0x7f050017;
         public static final int restore=0x7f050003;

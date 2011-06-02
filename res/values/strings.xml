@@ -33,4 +33,6 @@
     
     <string name="remove_group">Remove Group</string>
     <string name="remove_group_confirm">Remove group from the list?</string>
+
+    <string name="performing_restore">Performing Restore</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.koushikdutta.timemachine;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
@@ -131,9 +132,9 @@ public class BackupActivity extends Activity {
                     if (bg == null) {
                         bg = new BackupEntryGroup();
                         bg.name = gn.toString();
-                        bg.drawable = mGroupDrawable;
                         bm.groups.put(bg.name, bg);
                     }
+                    bg.drawable = mGroupDrawable;
                     for (int i = 0; i < mAdapter.getCount(); i++) {
                         SingleApplicationInfo sinfo = mAdapter.getItem(i);
                         bg.packages.add(sinfo.info.packageName);
@@ -196,6 +197,7 @@ public class BackupActivity extends Activity {
                             appIcon.setImageDrawable(sinfo.drawable);
                             final JSONObject metadata = new JSONObject();
                             final String outputDir = String.format("%s/%s/%d", Helper.BACKUP_DIR, sinfo.info.packageName, time);
+                            System.out.println(outputDir);
                             metadata.put("installer", pm.getInstallerPackageName(sinfo.info.packageName));
                             metadata.put("name", sinfo.name);
                             metadata.put("versionCode", sinfo.pinfo.versionCode);
@@ -216,6 +218,7 @@ public class BackupActivity extends Activity {
                                 void onStartBackground() {
                                     // do this stuff on the background to prevent ui thread blocking
                                     try {
+                                        new File(outputDir).mkdirs();
                                         StreamUtility.writeFile(outputDir + "/metadata.json", metadata.toString(4));
                                         BitmapDrawable bmp = (BitmapDrawable)sinfo.drawable;
                                         FileOutputStream fout = new FileOutputStream(outputDir + "/icon.png");

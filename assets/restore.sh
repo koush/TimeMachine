@@ -1,62 +1,53 @@
 #!/data/data/com.koushikdutta.timemachine/files/bash
 
-if [ -z "$FILESDIR" ]
-then
-  echo FILESDIR environment variable not set.
-  exit 1
-fi
+function fail {
+    echo $@
+    if [ ! -z "$OUTPUT_DIR" ]
+    then
+        rm -rf $OUTPUT_DIR
+    fi
+    exit 1
+}
 
-if [ -z "$BUSYBOX" ]
-then
-  echo BUSYBOX environment variable not set.
-  exit 1
-fi
+function assert {
+    VAL="echo \$$1"
+    VAL=$($VAL)
+    if [ -z "$VAL" ]
+    then
+        fail "$1 environment variable not set."
+    fi
+}
 
-if [ -z "$PACKAGE_NAME" ]
-then
-  echo PACKAGE_NAME environment variable not set.
-  exit 1
-fi
-
-if [ -z "$INPUT_DIR" ]
-then
-  echo INPUT_DIR environment variable not set.
-  exit 1
-fi
-
-if [ -z "$TIMEMACHINEDIR" ]
-then
-  echo TIMEMACHINEDIR environment variable not set.
-  exit 1
-fi
+assert FILESDIR
+assert BUSYBOX
+assert PACKAGE_NAME
+assert INPUT_DIR
+assert ASSETS_DIR
 
 APK_MD5=$(cat $INPUT_DIR/apk.md5sum)
-APK=$TIMEMACHINEDIR/assets/$APK_MD5
+APK=$ASSETS_DIR/$APK_MD5
 if [ ! -f $APK ]
 then
-	echo APK: $APK not found.
-	exit 1
+	fail $APK not found.
 fi
 
 $FILESDIR/pm install $APK
-if [ "$?" != "0" ]
+if [ "$?" != "0" -a -z "$SKIP_APK" ]
 then
-	echo Package install of $APK failed.
+	fail Package install of $APK failed.
 fi
 
 APK_DATA_DIR=/data/data/$PACKAGE_NAME
 if [ ! -d "$APK_DATA_DIR" ]
 then
-	echo $APK_DATA_DIR directory not found.
-	exit 1
+	fail $APK_DATA_DIR directory not found.
 fi
 
 PACKAGE_UID=$(ls -l /data/data | $BUSYBOX grep $PACKAGE_NAME | $BUSYBOX awk '{print $3}')
 
 if [ -z "$PACKAGE_UID" ]
 then
-	echo Could not determine package uid.
-	exit 1
+	fail Could not determine package uid.
 fi
 
 cd $APK_DATA_DIR

@@ -27,8 +27,7 @@ assert OUTPUT_DIR
 PACKAGE_APK=$($FILES_DIR/pm path $PACKAGE_NAME | cut -d : -f 2)
 if [ ! -f "$PACKAGE_APK" ]
 then
-  echo PACKAGE_APK: $PACKAGE_APK not found.
-  exit 1
+  fail PACKAGE_APK: $PACKAGE_APK not found.
 fi
 
 $BUSYBOX mkdir -p $ASSETS_DIR

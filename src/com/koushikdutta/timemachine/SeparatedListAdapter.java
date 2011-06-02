@@ -40,21 +40,6 @@ public class SeparatedListAdapter extends BaseAdapter {
         return null;
     }
 
-    public Adapter getItemAdapter(int position) {
-        for(Object section : this.sections.keySet()) {
-            Adapter adapter = sections.get(section);
-            int size = adapter.getCount() + 1;
-
-            // check if position inside this section
-            if(position == 0) return null;
-            if(position < size) return adapter;
-
-            // otherwise jump into next section
-            position -= size;
-        }
-        return null;
-    }
-
     public int getCount() {
         // total together all sections, plus one for each section header
         int total = 0;

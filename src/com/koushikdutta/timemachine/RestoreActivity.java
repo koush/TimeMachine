@@ -1,10 +1,13 @@
 package com.koushikdutta.timemachine;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class RestoreActivity extends Activity {
@@ -58,27 +62,23 @@ public class RestoreActivity extends Activity {
 
             return convertView;
         }
-        
-        public void onClick() {
-            mDisabled.clear();
-            
-            for (int i = 0; i < mGroupsAdapter.getCount(); i++) {
-                BackupEntryGroup batch = mGroupsAdapter.getItem(i);
-                if (!mChecked.contains(batch.getUniqueName()))
-                    continue;
-                for (String pkg: batch.packages) {
-                    mDisabled.add(pkg);
-                }
-            }
-            
-            mAdapter.notifyDataSetChanged();
-        }
     }
     
     BackupEntryAdapter<BackupEntryGroup> mGroupsAdapter;
     BackupEntryAdapter<BackupEntry> mAllAdapter;
     SeparatedListAdapter mAdapter;
 
+    void refreshCount() {
+        final TextView restoreCount = (TextView)findViewById(R.id.restore_count);
+        int count = 0;
+        for (int i = 0; i < mAllAdapter.getCount(); i++) {
+            BackupEntry be = mAllAdapter.getItem(i);
+            if (mDisabled.contains(be.getUniqueName()) || mChecked.contains(be.getUniqueName()))
+                count++;
+        }
+        restoreCount.setText(getString(R.string.restore_count, count));
+    }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,7 +87,6 @@ public class RestoreActivity extends Activity {
         
         mAllAdapter = new BackupEntryAdapter<BackupEntry>(this);
         ListView lv = (ListView)findViewById(R.id.list);
-        final TextView restoreCount = (TextView)findViewById(R.id.restore_count);
         lv.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
@@ -99,9 +98,19 @@ public class RestoreActivity extends Activity {
                     mChecked.add(be.getUniqueName());
                 }
                 bindCheckedState(view, restore);
-                BackupEntryAdapter<BackupEntryBase> badapter = (BackupEntryAdapter<BackupEntryBase>)mAdapter.getItemAdapter(position);
-                badapter.onClick();
-                restoreCount.setText(getString(R.string.restore_count, mChecked.size()));
+                mDisabled.clear();
+                
+                for (int i = 0; i < mGroupsAdapter.getCount(); i++) {
+                    BackupEntryGroup batch = mGroupsAdapter.getItem(i);
+                    if (!mChecked.contains(batch.getUniqueName()))
+                        continue;
+                    for (String pkg: batch.packages) {
+                        mDisabled.add(pkg);
+                    }
+                }
+                
+                mAdapter.notifyDataSetChanged();
+                refreshCount();
             }
         });
 
@@ -118,8 +127,10 @@ public class RestoreActivity extends Activity {
         clear.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                mDisabled.clear();
                 mChecked.clear();
-                mAllAdapter.notifyDataSetChanged();
+                mAdapter.notifyDataSetChanged();
+                refreshCount();
             }
         });    
         
@@ -129,6 +140,72 @@ public class RestoreActivity extends Activity {
         restore.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                AlertDialog.Builder builder = new Builder(RestoreActivity.this);
+                builder.setCancelable(false);
+                View content = getLayoutInflater().inflate(R.layout.restore_progress, null);
+                builder.setView(content);
+                builder.setTitle(R.string.performing_restore);
+                final Dialog progress = builder.create();
+                final ImageView appIcon = (ImageView)content.findViewById(R.id.application_icon);
+                final TextView appName = (TextView)content.findViewById(R.id.application_name);
+                final TextView appStatus = (TextView)content.findViewById(R.id.application_status);
+                final ProgressBar progressBar = (ProgressBar)content.findViewById(R.id.progress);
+                final Button done = (Button)content.findViewById(R.id.done);
+                final ArrayList<BackupEntry> toRestore = new ArrayList<BackupEntry>();
+                
+                for (int i = 0; i < mAllAdapter.getCount(); i++) {
+                    BackupEntry be = mAllAdapter.getItem(i);
+                    if (mDisabled.contains(be.getUniqueName()) || mChecked.contains(be.getUniqueName())) {
+                        toRestore.add(be);
+                    }
+                }
+                
+                progressBar.setIndeterminate(false);
+                progressBar.setMax(mAdapter.getCount());
+                progress.show();
+                
+                final Runnable runner = new Runnable() {
+                    {
+                        done.setOnClickListener(new OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (!finished) {
+                                    finished = true;
+                                }
+                                else {
+                                    finish();
+                                }
+                            }
+                        });
+                    }
+                    
+                    boolean finished = false;
+                    int current = 0;
+                    @Override
+                    public void run() {
+                        if (current >= mAdapter.getCount() || finished) {
+                            finished = true;
+                            done.setText(android.R.string.ok);
+                            appName.setText(R.string.backup_complete);
+                            appIcon.setImageDrawable(getResources().getDrawable(R.drawable.icon));
+                            appStatus.setText(getString(R.string.applications_backed_up, current));
+                            progressBar.setVisibility(View.GONE);
+                            return;
+                        }
+                        progressBar.setProgress(current);
+
+                        try {
+                            
+                        }
+                        catch (Exception ex) {
+                            ex.printStackTrace();
+                            current++;
+                            run();
+                        }
+                    }
+                };
+                
+                runner.run();
             }
         });
     }
