@@ -12,12 +12,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.BitmapDrawable;
-import android.widget.TextView.SavedState;
 
 public class BackupManager {
     Context mContext;
@@ -164,6 +164,7 @@ public class BackupManager {
     }
     
     private void refreshBackups() {
+        PackageManager pm = mContext.getPackageManager();
         backups.clear();
         File backupDir = new File(Helper.BACKUP_DIR);
         // find all the metadata.json and populate the ui
@@ -196,6 +197,11 @@ public class BackupManager {
                 BitmapDrawable drawable = new BitmapDrawable(bmp);
                 fin.close();
                 BackupEntry b = BackupEntry.from(info, drawable, Long.parseLong(appBackups[appBackups.length - 1].getName()));
+                try {
+                     b.packageInfo = pm.getPackageInfo(b.packageName, 0);
+                }
+                catch (Exception ex) {
+                }
                 backups.put(dir.getName(), b);
             }
             catch (Exception ex) {

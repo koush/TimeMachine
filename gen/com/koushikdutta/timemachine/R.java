@@ -71,7 +71,10 @@ public final class R {
         public static final int backup_count=0x7f05000e;
         public static final int clear=0x7f050004;
         public static final int confirm_backup=0x7f05000c;
+        public static final int confirm_install=0x7f05001b;
         public static final int games=0x7f050007;
+        public static final int install_older_app=0x7f05001c;
+        public static final int no=0x7f05001a;
         public static final int performing_backup=0x7f05000f;
         public static final int performing_restore=0x7f050018;
         public static final int remove_group=0x7f050016;
@@ -85,5 +88,6 @@ public final class R {
         public static final int sort_by_name=0x7f050013;
         public static final int sort_by_package=0x7f050012;
         public static final int start_backup=0x7f050005;
+        public static final int yes=0x7f050019;
     }
 }

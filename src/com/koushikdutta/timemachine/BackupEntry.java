@@ -1,8 +1,11 @@
 package com.koushikdutta.timemachine;
 
+import java.util.ArrayList;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
@@ -10,18 +13,30 @@ public class BackupEntry extends BackupEntryBase {
     public JSONObject info;
     public String packageName;
     public long newest;
+    public PackageInfo packageInfo;
+    private ArrayList<BackupRecord> backups;
+    public int versionCode;
+    
+    public ArrayList<BackupRecord> getBackups() {
+        if (backups == null) {
+            
+        }
+        return backups;
+    }
     
     private BackupEntry() {
     }
     public static BackupEntry from(JSONObject info, Drawable drawable, long newest) throws JSONException {
         String name = info.getString("name");
         String packageName = info.getString("packageName");
+        int versionCode = info.getInt("versionCode");
         BackupEntry ret = new BackupEntry();
         ret.info = info;
         ret.drawable = drawable;
         ret.name = name;
         ret.packageName = packageName;
         ret.newest = newest;
+        ret.versionCode = versionCode;
         return ret;
     }
     

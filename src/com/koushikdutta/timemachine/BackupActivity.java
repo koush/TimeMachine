@@ -144,7 +144,7 @@ public class BackupActivity extends Activity {
                 }
                 
                 
-                final long time = System.currentTimeMillis();
+                final long timestamp = System.currentTimeMillis();
                 AlertDialog.Builder builder = new Builder(BackupActivity.this);
                 builder.setCancelable(false);
                 View content = getLayoutInflater().inflate(R.layout.backup_progress, null);
@@ -196,13 +196,14 @@ public class BackupActivity extends Activity {
                             appName.setText(sinfo.name);
                             appIcon.setImageDrawable(sinfo.drawable);
                             final JSONObject metadata = new JSONObject();
-                            final String outputDir = String.format("%s/%s/%d", Helper.BACKUP_DIR, sinfo.info.packageName, time);
+                            final String outputDir = String.format("%s/%s/%d", Helper.BACKUP_DIR, sinfo.info.packageName, timestamp);
                             System.out.println(outputDir);
                             metadata.put("installer", pm.getInstallerPackageName(sinfo.info.packageName));
                             metadata.put("name", sinfo.name);
                             metadata.put("versionCode", sinfo.pinfo.versionCode);
                             metadata.put("versionName", sinfo.pinfo.versionName);
                             metadata.put("packageName", sinfo.info.packageName);
+                            metadata.put("timestamp", timestamp);
                             suRunner.mEnvironment.put("OUTPUT_DIR", outputDir);
                             suRunner.mEnvironment.put("PACKAGE_NAME", sinfo.info.packageName);
                             suRunner.addCommand(String.format("%s/backup.sh", getFilesDir().getAbsolutePath()));

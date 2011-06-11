@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -172,9 +173,6 @@ public class RestoreActivity extends Activity {
                                 if (!finished) {
                                     finished = true;
                                 }
-                                else {
-                                    finish();
-                                }
                             }
                         });
                     }
@@ -195,7 +193,39 @@ public class RestoreActivity extends Activity {
                         progressBar.setProgress(current);
 
                         try {
-                            
+                            final SuRunner suRunner = new SuRunner();
+                            final SuCommandCallback callback = new SuCommandCallback() {
+                                @Override
+                                public void onResult(Integer result) {
+                                    run();
+                                }
+                            };
+                            BackupEntry be = toRestore.get(current);
+                            if (be.versionCode == be.packageInfo.versionCode) {
+                                // no op
+                                suRunner.runSuCommandAsync(RestoreActivity.this, callback);
+                            }
+                            else if (be.versionCode < be.packageInfo.versionCode) {
+                                AlertDialog.Builder builder = new Builder(RestoreActivity.this);
+                                builder.setCancelable(false);
+                                builder.setTitle(R.string.confirm_install);
+                                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        suRunner.runSuCommandAsync(RestoreActivity.this, callback);
+                                    }
+                                });
+                                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        run();
+                                    }
+                                });
+                            }
+                            else {
+                                // install the newer one automatically
+                                suRunner.runSuCommandAsync(RestoreActivity.this, callback);
+                            }
                         }
                         catch (Exception ex) {
                             ex.printStackTrace();

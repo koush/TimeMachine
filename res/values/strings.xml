@@ -35,4 +35,10 @@
     <string name="remove_group_confirm">Remove group from the list?</string>
 
     <string name="performing_restore">Performing Restore</string>
+    
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    
+    <string name="confirm_install">Confirm Install</string>
+    <string name="install_older_app">You are attempting to reinstall an older version of %s. Are you sure?</string>
 </resources>
