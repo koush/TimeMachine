@@ -204,7 +204,7 @@ public class RestoreActivity extends Activity {
                                     current++;
                                     run();
                                 }
-                                
+
                                 @Override
                                 public void onOutputLine(String line) {
                                     System.out.println(line);
@@ -214,6 +214,8 @@ public class RestoreActivity extends Activity {
                             BackupEntry be = toRestore.get(current);
                             suRunner.mEnvironment.put("INPUT_DIR", String.format("%s/%s/%d", Helper.BACKUP_DIR, be.packageName, be.newest));
                             suRunner.mEnvironment.put("PACKAGE_NAME", be.packageName);
+                            if (be.packageInfo != null)
+                                suRunner.mEnvironment.put("APK_EXISTS", "true");
                             appName.setText(be.name);
                             appIcon.setImageDrawable(be.drawable);
                             if (be.packageInfo == null || be.versionCode == be.packageInfo.versionCode || be.versionCode > be.packageInfo.versionCode) {
