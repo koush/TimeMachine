@@ -168,7 +168,10 @@ public class BackupManager {
         backups.clear();
         File backupDir = new File(Helper.BACKUP_DIR);
         // find all the metadata.json and populate the ui
-        for (File dir: Helper.getDirectories(backupDir)) {
+        File[] backupDirs = Helper.getDirectories(backupDir);
+        if (backupDirs == null)
+            return;
+        for (File dir: backupDirs) {
             try {
                 File[] appBackups = dir.listFiles(new FileFilter() {
                     @Override

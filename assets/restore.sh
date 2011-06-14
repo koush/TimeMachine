@@ -6,24 +6,31 @@ function fail {
     then
         rm -rf $OUTPUT_DIR
     fi
+    # try to reenable it...
+    if [ ! -z "$PACKAGE_NAME" ]
+    then
+	    pm enable $PACKAGE_NAME > /dev/null 2> /dev/null
+    fi
     exit 1
 }
 
 function assert {
-    VAL="echo \$$1"
-    VAL=$($VAL)
+    VAL=$(eval "echo \$$1")
+    echo $VAL
     if [ -z "$VAL" ]
     then
         fail "$1 environment variable not set."
     fi
 }
 
-assert FILESDIR
+echo FD: $FILES_DIR
+assert FILES_DIR
 assert BUSYBOX
 assert PACKAGE_NAME
 assert INPUT_DIR
 assert ASSETS_DIR
 
+echo INPUT_DIR: $INPUT_DIR
 APK_MD5=$(cat $INPUT_DIR/apk.md5sum)
 APK=$ASSETS_DIR/$APK_MD5
 if [ ! -f $APK ]
@@ -31,10 +38,19 @@ then
 	fail $APK not found.
 fi
 
-$FILESDIR/pm install $APK
-if [ "$?" != "0" -a -z "$SKIP_APK" ]
+echo Disabling $PACKAGE_NAME
+pm disable $PACKAGE_NAME
+echo Clearing $PACKAGE_NAME
+pm clear $PACKAGE_NAME
+if [ ! -z "$INSTALL_APK" ]
 then
-	fail Package install of $APK failed.
+	echo Reinstalling $PACKAGE_NAME
+	$FILES_DIR/pm install -r $FORWARD_LOCK $INSTALLER $INSTALL_LOCATION $APK
+	if [ "$?" != "0" -a -z "$SKIP_APK" ]
+	then
+		fail Package install of $APK failed.
+	fi
+	echo Reinstallation of $PACKAGE_NAME complete.
 fi
 
 APK_DATA_DIR=/data/data/$PACKAGE_NAME
@@ -60,3 +76,5 @@ then
   cd /sdcard/Android/data/$PACKAGE_NAME
   $BUSYBOX tar xzvf $INPUT_DIR/external.tgz
 fi
+
+pm enable $PACKAGE_NAME

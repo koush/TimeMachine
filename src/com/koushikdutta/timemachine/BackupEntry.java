@@ -1,12 +1,18 @@
 package com.koushikdutta.timemachine;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.pm.PackageInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 public class BackupEntry extends BackupEntryBase {
@@ -14,12 +20,37 @@ public class BackupEntry extends BackupEntryBase {
     public String packageName;
     public long newest;
     public PackageInfo packageInfo;
-    private ArrayList<BackupRecord> backups;
+    private ArrayList<BackupEntry> backups;
     public int versionCode;
     
-    public ArrayList<BackupRecord> getBackups() {
+    public ArrayList<BackupEntry> getBackups() {
         if (backups == null) {
-            
+            backups = new ArrayList<BackupEntry>();
+            File backupDir = new File(String.format("%s/%s", Helper.BACKUP_DIR, packageName));
+            File[] dirs = backupDir.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    try {
+                        if (!pathname.isDirectory())
+                            return false;
+                        Long.parseLong(pathname.getName());
+                        return true;
+                    }
+                    catch (Exception ex) {
+                        return false;
+                    }
+                }
+            });
+            for (File dir: dirs) {
+                try {
+                    BackupEntry be = from(dir, drawable);
+                    if (be != null)
+                        backups.add(be);
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
         return backups;
     }
@@ -38,6 +69,27 @@ public class BackupEntry extends BackupEntryBase {
         ret.newest = newest;
         ret.versionCode = versionCode;
         return ret;
+    }
+    
+    public static BackupEntry from(File dir, Drawable useBmp) {
+        try {
+            File metadata = new File(dir.getAbsolutePath() + "/metadata.json");
+            File icon = new File(dir.getAbsolutePath() + "/icon.png");
+            JSONObject info = new JSONObject(StreamUtility.readFile(metadata));
+            Drawable drawable = useBmp;
+            if (drawable == null) {
+                FileInputStream fin = new FileInputStream(icon);
+                Bitmap bmp = BitmapFactory.decodeStream(fin);
+                drawable = new BitmapDrawable(bmp);
+                fin.close();
+            }
+            
+            long newest = Long.parseLong(dir.getName());
+            return BackupEntry.from(info, drawable, newest);
+        }
+        catch (Exception ex) {
+            return null;
+        }
     }
     
     private static long ONE_WEEK = 7L * 24L * 60L * 60L * 1000L;

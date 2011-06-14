@@ -35,6 +35,8 @@
     <string name="remove_group_confirm">Remove group from the list?</string>
 
     <string name="performing_restore">Performing Restore</string>
+    <string name="restore_complete">Restore Complete</string>
+    <string name="applications_restored">%d applications restored.</string>
     
     <string name="yes">Yes</string>
     <string name="no">No</string>

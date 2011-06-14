@@ -173,6 +173,9 @@ public class RestoreActivity extends Activity {
                                 if (!finished) {
                                     finished = true;
                                 }
+                                else {
+                                    progress.dismiss();
+                                }
                             }
                         });
                     }
@@ -181,12 +184,12 @@ public class RestoreActivity extends Activity {
                     int current = 0;
                     @Override
                     public void run() {
-                        if (current >= mAdapter.getCount() || finished) {
+                        if (current >= toRestore.size() || finished) {
                             finished = true;
                             done.setText(android.R.string.ok);
-                            appName.setText(R.string.backup_complete);
+                            appName.setText(R.string.restore_complete);
                             appIcon.setImageDrawable(getResources().getDrawable(R.drawable.icon));
-                            appStatus.setText(getString(R.string.applications_backed_up, current));
+                            appStatus.setText(getString(R.string.applications_restored, current));
                             progressBar.setVisibility(View.GONE);
                             return;
                         }
@@ -194,15 +197,28 @@ public class RestoreActivity extends Activity {
 
                         try {
                             final SuRunner suRunner = new SuRunner();
+                            suRunner.addCommand(String.format("%s/restore.sh", getFilesDir().getAbsolutePath()));
                             final SuCommandCallback callback = new SuCommandCallback() {
                                 @Override
                                 public void onResult(Integer result) {
+                                    current++;
                                     run();
+                                }
+                                
+                                @Override
+                                public void onOutputLine(String line) {
+                                    System.out.println(line);
+                                    appStatus.setText(line);
                                 }
                             };
                             BackupEntry be = toRestore.get(current);
-                            if (be.versionCode == be.packageInfo.versionCode) {
+                            suRunner.mEnvironment.put("INPUT_DIR", String.format("%s/%s/%d", Helper.BACKUP_DIR, be.packageName, be.newest));
+                            suRunner.mEnvironment.put("PACKAGE_NAME", be.packageName);
+                            appName.setText(be.name);
+                            appIcon.setImageDrawable(be.drawable);
+                            if (be.packageInfo == null || be.versionCode == be.packageInfo.versionCode || be.versionCode > be.packageInfo.versionCode) {
                                 // no op
+                                suRunner.mEnvironment.put("INSTALL_APK", "true");
                                 suRunner.runSuCommandAsync(RestoreActivity.this, callback);
                             }
                             else if (be.versionCode < be.packageInfo.versionCode) {
@@ -212,6 +228,7 @@ public class RestoreActivity extends Activity {
                                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+                                        suRunner.mEnvironment.put("INSTALL_APK", "true");
                                         suRunner.runSuCommandAsync(RestoreActivity.this, callback);
                                     }
                                 });
@@ -223,8 +240,7 @@ public class RestoreActivity extends Activity {
                                 });
                             }
                             else {
-                                // install the newer one automatically
-                                suRunner.runSuCommandAsync(RestoreActivity.this, callback);
+                                throw new Exception("Thar be impossibilities!");
                             }
                         }
                         catch (Exception ex) {

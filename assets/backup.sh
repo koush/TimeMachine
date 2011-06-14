@@ -10,8 +10,8 @@ function fail {
 }
 
 function assert {
-    VAL="echo \$$1"
-    VAL=$($VAL)
+    VAL=$(eval "echo \$$1")
+    echo $VAL
     if [ -z "$VAL" ]
     then
         fail "$1 environment variable not set."

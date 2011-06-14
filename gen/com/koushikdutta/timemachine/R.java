@@ -66,20 +66,22 @@ public final class R {
         public static final int application_groups=0x7f050009;
         public static final int applications=0x7f050001;
         public static final int applications_backed_up=0x7f050011;
+        public static final int applications_restored=0x7f05001a;
         public static final int backup=0x7f05000a;
         public static final int backup_complete=0x7f050010;
         public static final int backup_count=0x7f05000e;
         public static final int clear=0x7f050004;
         public static final int confirm_backup=0x7f05000c;
-        public static final int confirm_install=0x7f05001b;
+        public static final int confirm_install=0x7f05001d;
         public static final int games=0x7f050007;
-        public static final int install_older_app=0x7f05001c;
-        public static final int no=0x7f05001a;
+        public static final int install_older_app=0x7f05001e;
+        public static final int no=0x7f05001c;
         public static final int performing_backup=0x7f05000f;
         public static final int performing_restore=0x7f050018;
         public static final int remove_group=0x7f050016;
         public static final int remove_group_confirm=0x7f050017;
         public static final int restore=0x7f050003;
+        public static final int restore_complete=0x7f050019;
         public static final int restore_count=0x7f050015;
         public static final int select_an_application_to_backup=0x7f05000b;
         public static final int sms_and_mms=0x7f050006;
@@ -88,6 +90,6 @@ public final class R {
         public static final int sort_by_name=0x7f050013;
         public static final int sort_by_package=0x7f050012;
         public static final int start_backup=0x7f050005;
-        public static final int yes=0x7f050019;
+        public static final int yes=0x7f05001b;
     }
 }
