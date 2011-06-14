@@ -37,11 +37,15 @@ fi
 
 if [ ! -z "APK_EXISTS" ]
 then
-	echo APK_EXISTS $APK_EXISTS
-	echo Disabling $PACKAGE_NAME
-	pm disable $PACKAGE_NAME
-	echo Clearing $PACKAGE_NAME
-	pm clear $PACKAGE_NAME
+	if [ -z "$INSTALL_APK" ]
+	then
+		echo Clearing $PACKAGE_NAME
+		pm clear $PACKAGE_NAME
+		echo Disabling $PACKAGE_NAME
+		pm disable $PACKAGE_NAME
+	else
+		pm uninstall $PACKAGE_NAME
+	fi
 fi
 
 if [ ! -z "$INSTALL_APK" ]
@@ -68,15 +72,30 @@ then
 	fail Could not determine package uid.
 fi
 
+function restoreblob {
+	if [ ! -f "$1" ]
+	then
+		fail $1 not found.
+	fi
+	blobmd5=$ASSETS_DIR/$(cat $1)
+	if [ ! -f "$blobmd5" ]
+	then
+		fail $blobmd5 not found.
+	fi
+	tar xzvf $blobmd5
+}
+
 cd $APK_DATA_DIR
-$BUSYBOX tar xzvf $INPUT_DIR/internal.tgz
+echo Restoring data.
+restoreblob $INPUT_DIR/internal.md5sum
 $BUSYBOX chown -R $PACKAGE_UID:$PACKAGE_UID .
 
-if [ -f $INPUT_DIR/external.tgz ]
+if [ -f $INPUT_DIR/external.md5sum ]
 then
-  $BUSYBOX mkdir -p /sdcard/Android/data/$PACKAGE_NAME
-  cd /sdcard/Android/data/$PACKAGE_NAME
-  $BUSYBOX tar xzvf $INPUT_DIR/external.tgz
+	echo Restoring external data.
+	$BUSYBOX mkdir -p /sdcard/Android/data/$PACKAGE_NAME
+	cd /sdcard/Android/data/$PACKAGE_NAME
+	restoreblob $INPUT_DIR/external.md5sum
 fi
 
 pm enable $PACKAGE_NAME

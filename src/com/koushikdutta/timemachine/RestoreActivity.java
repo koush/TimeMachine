@@ -237,6 +237,7 @@ public class RestoreActivity extends Activity {
                                 builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+                                        current++;
                                         run();
                                     }
                                 });
