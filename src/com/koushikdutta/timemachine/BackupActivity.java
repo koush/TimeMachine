@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -160,6 +161,15 @@ public class BackupActivity extends Activity {
                 progressBar.setMax(mAdapter.getCount());
                 progress.show();
                 
+                Context _marketContext = null;
+                try {
+                    _marketContext = createPackageContext("com.android.vending", 0);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                final Context marketContext = _marketContext;
+                
                 final Runnable runner = new Runnable() {
                     {
                         done.setOnClickListener(new OnClickListener() {
@@ -204,6 +214,9 @@ public class BackupActivity extends Activity {
                             metadata.put("versionName", sinfo.pinfo.versionName);
                             metadata.put("packageName", sinfo.info.packageName);
                             metadata.put("timestamp", timestamp);
+                            if (marketContext != null) {
+                                suRunner.mEnvironment.put("MARKET_DATABASE", marketContext.getDatabasePath("assets14.db").getAbsolutePath());
+                            }
                             suRunner.mEnvironment.put("OUTPUT_DIR", outputDir);
                             suRunner.mEnvironment.put("PACKAGE_NAME", sinfo.info.packageName);
                             suRunner.addCommand(String.format("%s/backup.sh", getFilesDir().getAbsolutePath()));
@@ -233,6 +246,7 @@ public class BackupActivity extends Activity {
                                 
                                 @Override
                                 public void onOutputLine(String line) {
+                                    System.out.println(line);
                                     appStatus.setText(line);
                                 }
                             });

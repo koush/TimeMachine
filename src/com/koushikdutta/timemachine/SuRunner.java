@@ -94,6 +94,7 @@ public class SuRunner {
             String scriptName = SCRIPT_NAME;
             DataOutputStream fout = new DataOutputStream(context.openFileOutput(scriptName, 0));
             
+            mEnvironment.put("SQLITE3", context.getFilesDir().getAbsolutePath() + "/sqlite3");
             mEnvironment.put("BUSYBOX", context.getFilesDir().getAbsolutePath() + "/busybox");
             mEnvironment.put("FILES_DIR", context.getFilesDir().getAbsolutePath());
             mEnvironment.put("TIMEMACHINE_DIR", Helper.BASE_DIR);

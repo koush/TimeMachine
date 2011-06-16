@@ -24,9 +24,11 @@ function assert {
 
 assert FILES_DIR
 assert BUSYBOX
+assert SQLITE3
 assert PACKAGE_NAME
 assert INPUT_DIR
 assert ASSETS_DIR
+assert VERSION_CODE
 
 APK_MD5=$(cat $INPUT_DIR/apk.md5sum)
 APK=$ASSETS_DIR/$APK_MD5
@@ -35,6 +37,7 @@ then
 	fail $APK not found.
 fi
 
+APK_EXISTS=$(pm path $PACKAGE_NAME)
 if [ ! -z "APK_EXISTS" ]
 then
 	if [ -z "$INSTALL_APK" ]
@@ -44,6 +47,7 @@ then
 		echo Disabling $PACKAGE_NAME
 		pm disable $PACKAGE_NAME
 	else
+		echo Uninstalling $PACKAGE_NAME
 		pm uninstall $PACKAGE_NAME
 	fi
 fi
@@ -97,5 +101,16 @@ then
 	cd /sdcard/Android/data/$PACKAGE_NAME
 	restoreblob $INPUT_DIR/external.md5sum
 fi
+
+if [ -f "$MARKET_DATABASE" -a ! -z "$RESTORE_MARKET_LINKS" -a -f $INPUT_DIR/server_string_id ]
+then
+	SERVER_STRING_ID=$(cat $INPUT_DIR/server_string_id)
+	echo Restoring Market Links. $MARKET_DATABASE $SERVER_STRING_ID
+	sqlite3 $MARKET_DATABASE "delete from assets10 where package_name='$PACKAGE_NAME'"
+	sqlite3 $MARKET_DATABASE "insert into assets10 (type, package_name, state, version_code, auto_update, download_pending_time, download_start_time, install_time, uninstall_time, size, is_forward_locked, refund_timeout, server_string_id) values (1, '$PACKAGE_NAME', 'INSTALLED', $VERSION_CODE, 2, 0, 0, 0, 0, 0, 'false', 0, $SERVER_STRING_ID)"
+else
+	echo Not restoring Market links.
+fi
+
 
 pm enable $PACKAGE_NAME

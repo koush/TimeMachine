@@ -21,6 +21,7 @@ function assert {
 assert FILES_DIR
 assert ASSETS_DIR
 assert BUSYBOX
+assert SQLITE3
 assert PACKAGE_NAME
 assert OUTPUT_DIR
 
@@ -71,3 +72,18 @@ then
 fi
 
 saveblob $PACKAGE_APK $OUTPUT_DIR/apk.md5sum
+
+echo Saving Market links. $MARKET_DATABASE
+if [ -f "$MARKET_DATABASE" ]
+then
+	SERVER_STRING_ID=$($SQLITE3 $MARKET_DATABASE "select server_string_id from assets10 where package_name='$PACKAGE_NAME' limit 1")
+	if [ ! -z "$SERVER_STRING_ID" ]
+	then
+		echo Saving server_string_id $SERVER_STRING_ID
+		echo $SERVER_STRING_ID > $OUTPUT_DIR/server_string_id
+	else
+		echo server_string_id for $PACKAGE_NAME not found.
+	fi
+else
+	echo Market Database: $MARKET_DATABASE not found.
+fi

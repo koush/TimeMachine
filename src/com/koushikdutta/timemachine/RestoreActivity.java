@@ -165,6 +165,15 @@ public class RestoreActivity extends Activity {
                 progressBar.setMax(mAdapter.getCount());
                 progress.show();
                 
+                Context _marketContext = null;
+                try {
+                    _marketContext = createPackageContext("com.android.vending", 0);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                final Context marketContext = _marketContext;
+
                 final Runnable runner = new Runnable() {
                     {
                         done.setOnClickListener(new OnClickListener() {
@@ -197,6 +206,9 @@ public class RestoreActivity extends Activity {
 
                         try {
                             final SuRunner suRunner = new SuRunner();
+                            if (marketContext != null) {
+                                suRunner.mEnvironment.put("MARKET_DATABASE", marketContext.getDatabasePath("assets14.db").getAbsolutePath());
+                            }
                             suRunner.addCommand(String.format("%s/restore.sh", getFilesDir().getAbsolutePath()));
                             final SuCommandCallback callback = new SuCommandCallback() {
                                 @Override
@@ -214,8 +226,8 @@ public class RestoreActivity extends Activity {
                             BackupEntry be = toRestore.get(current);
                             suRunner.mEnvironment.put("INPUT_DIR", String.format("%s/%s/%d", Helper.BACKUP_DIR, be.packageName, be.newest));
                             suRunner.mEnvironment.put("PACKAGE_NAME", be.packageName);
-                            if (be.packageInfo != null)
-                                suRunner.mEnvironment.put("APK_EXISTS", "true");
+                            suRunner.mEnvironment.put("VERSION_CODE", String.valueOf(be.versionCode));
+                            suRunner.mEnvironment.put("RESTORE_MARKET_LINKS", "true");
                             appName.setText(be.name);
                             appIcon.setImageDrawable(be.drawable);
                             if (be.packageInfo == null || be.versionCode == be.packageInfo.versionCode || be.versionCode > be.packageInfo.versionCode) {
