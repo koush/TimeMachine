@@ -40,16 +40,10 @@ fi
 APK_EXISTS=$(pm path $PACKAGE_NAME)
 if [ ! -z "APK_EXISTS" ]
 then
-	if [ -z "$INSTALL_APK" ]
-	then
-		echo Clearing $PACKAGE_NAME
-		pm clear $PACKAGE_NAME
-		echo Disabling $PACKAGE_NAME
-		pm disable $PACKAGE_NAME
-	else
-		echo Uninstalling $PACKAGE_NAME
-		pm uninstall $PACKAGE_NAME
-	fi
+	echo Clearing $PACKAGE_NAME
+	pm clear $PACKAGE_NAME
+	echo Disabling $PACKAGE_NAME
+	pm disable $PACKAGE_NAME
 fi
 
 if [ ! -z "$INSTALL_APK" ]
